@@ -1,0 +1,623 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>理科Hack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Noto+Sans+JP:wght@400;700;900&display=swap');
+    
+    :root {
+      --primary: #00b3ff;
+      --secondary: #0066cc;
+      --accent: #00ffcc;
+      --highlight: #ffff00;
+      --dark: #0a0a20;
+      --darker: #050510;
+      --glow: 0 0 10px var(--primary), 0 0 20px rgba(0, 179, 255, 0.5);
+      --highlight-glow: 0 0 10px var(--highlight), 0 0 15px rgba(255, 255, 0, 0.5);
+    }
+    
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background-color: var(--darker);
+      color: white;
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(0, 102, 204, 0.1) 0%, transparent 80%),
+        linear-gradient(to bottom, var(--darker), var(--dark));
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .checkpoint-title {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      text-shadow: var(--glow);
+      text-transform: uppercase;
+      border-radius: 12px;
+      padding: 0.1em 0.2em;
+      background: linear-gradient(to right, var(--primary), #0099ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .checkpoint-title:after {
+      content: attr(data-text);
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: -1;
+      background: linear-gradient(to right, var(--secondary), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: blur(8px);
+      opacity: 0.7;
+    }
+    
+    .cyber-title {
+      font-family: 'Orbitron', sans-serif;
+      text-shadow: var(--glow);
+    }
+    
+    .cyber-panel {
+      background: rgba(10, 10, 32, 0.8);
+      border: 1px solid var(--primary);
+      box-shadow: var(--glow);
+      backdrop-filter: blur(5px);
+    }
+    
+    .cyber-btn {
+      background: linear-gradient(to right, var(--secondary), var(--primary));
+      border: 1px solid var(--accent);
+      font-family: 'Orbitron', sans-serif;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    
+    .cyber-btn:hover {
+      box-shadow: var(--glow);
+      transform: translateY(-2px);
+    }
+    
+    .cyber-btn:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+    
+    .cyber-btn:hover:before {
+      left: 100%;
+    }
+    
+    .cyber-input {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--primary);
+      color: white;
+    }
+    
+    .cyber-input:focus {
+      box-shadow: var(--glow);
+      outline: none;
+    }
+    
+    .grid-pattern {
+      background-image: linear-gradient(rgba(0, 179, 255, 0.1) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0, 179, 255, 0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+    
+    .cyber-progress {
+      height: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--primary);
+      overflow: hidden;
+    }
+    
+    .cyber-progress-bar {
+      height: 100%;
+      background: linear-gradient(to right, var(--secondary), var(--primary));
+      transition: width 0.3s;
+    }
+    
+    .option-btn {
+      transition: all 0.3s;
+    }
+    
+    .option-btn:hover {
+      transform: translateX(5px);
+    }
+    
+    .option-btn.correct {
+      background: rgba(0, 255, 100, 0.3);
+      border-color: #00ff64;
+    }
+    
+    .option-btn.incorrect {
+      background: rgba(255, 0, 80, 0.3);
+      border-color: #ff0050;
+    }
+    
+    .score-animation {
+      animation: scorePopup 0.5s ease-out;
+    }
+    
+    @keyframes scorePopup {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.5); }
+      100% { transform: scale(1); }
+    }
+    
+    .glitch-effect {
+      position: relative;
+    }
+    
+    .glitch-effect:after {
+      content: attr(data-text);
+      position: absolute;
+      left: 2px;
+      text-shadow: -1px 0 red;
+      top: 0;
+      color: white;
+      overflow: hidden;
+      clip: rect(0, 900px, 0, 0);
+      animation: glitch-anim 2s infinite linear alternate-reverse;
+    }
+    
+    @keyframes glitch-anim {
+      0% { clip: rect(44px, 9999px, 56px, 0); } 5% { clip: rect(36px, 9999px, 4px, 0); } 10% { clip: rect(85px, 9999px, 59px, 0); } 15% { clip: rect(20px, 9999px, 78px, 0); } 20% { clip: rect(63px, 9999px, 26px, 0); } 25% { clip: rect(45px, 9999px, 13px, 0); } 30% { clip: rect(76px, 9999px, 73px, 0); } 35% { clip: rect(5px, 9999px, 29px, 0); } 40% { clip: rect(26px, 9999px, 74px, 0); } 45% { clip: rect(89px, 9999px, 11px, 0); } 50% { clip: rect(50px, 9999px, 84px, 0); } 55% { clip: rect(23px, 9999px, 56px, 0); } 60% { clip: rect(80px, 9999px, 3px, 0); } 65% { clip: rect(68px, 9999px, 16px, 0); } 70% { clip: rect(90px, 9999px, 58px, 0); } 75% { clip: rect(10px, 9999px, 13px, 0); } 80% { clip: rect(37px, 9999px, 53px, 0); } 85% { clip: rect(80px, 9999px, 69px, 0); } 90% { clip: rect(16px, 9999px, 38px, 0); } 95% { clip: rect(69px, 9999px, 43px, 0); } 100% { clip: rect(41px, 9999px, 36px, 0); }
+    }
+    
+    .selected-item {
+      border: 2px solid var(--highlight);
+      box-shadow: var(--highlight-glow);
+      transform: translateY(-2px);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .selected-item:before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border: 2px solid var(--highlight);
+      border-radius: 0.375rem;
+      animation: pulseHighlight 1.5s infinite;
+      z-index: -1;
+    }
+    
+    @keyframes pulseHighlight {
+      0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; }
+    }
+    
+    .home-btn {
+      background: rgba(0, 102, 204, 0.3);
+      border: 1px solid var(--accent);
+      transition: all 0.3s;
+    }
+    
+    .home-btn:hover {
+      background: rgba(0, 102, 204, 0.5);
+      box-shadow: var(--glow);
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-pattern"></div>
+  
+  <div class="container mx-auto px-4 py-8">
+    <div id="app" class="max-w-4xl mx-auto">
+      <!-- Start Screen -->
+      <div id="start-screen" class="cyber-panel p-8 rounded-lg">
+        <h1 class="checkpoint-title text-4xl md:text-6xl text-center mb-4 glitch-effect" data-text="理科Hack">理科Hack</h1>
+        <p class="text-center mb-8 text-gray-300">中学1年生【1学期】編</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div class="cyber-panel p-4 rounded-lg">
+            <h2 class="cyber-title text-xl mb-3 text-center text-primary">学習分野</h2>
+            <div class="space-y-2">
+              <button class="category-btn cyber-btn w-full py-2 px-4 rounded-md text-left" data-category="biology-basics">身近な生物の観察</button>
+              <button class="category-btn cyber-btn w-full py-2 px-4 rounded-md text-left" data-category="plants">植物の生活と種類</button>
+              <button class="category-btn cyber-btn w-full py-2 px-4 rounded-md text-left" data-category="animals">動物の分類</button>
+              <button class="category-btn cyber-btn w-full py-2 px-4 rounded-md text-left" data-category="chemistry-basics">身のまわりの物質</button>
+              <button class="category-btn cyber-btn w-full py-2 px-4 rounded-md text-left" data-category="physics-basics">光・音・力の世界</button>
+            </div>
+          </div>
+          
+          <div class="cyber-panel p-4 rounded-lg">
+            <h2 class="cyber-title text-xl mb-3 text-center text-primary">難易度</h2>
+            <div class="space-y-2">
+              <button class="difficulty-btn cyber-btn w-full py-2 px-4 rounded-md text-left" data-difficulty="standard">STANDARD (基本)</button>
+              <button class="difficulty-btn cyber-btn w-full py-2 px-4 rounded-md text-left" data-difficulty="expert">EXPERT (発展)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cyber-panel p-4 rounded-lg mb-8">
+          <h2 class="cyber-title text-xl mb-3 text-center text-primary">問題モード</h2>
+          <div class="space-y-2">
+            <button class="mode-btn cyber-btn w-full py-2 px-4 rounded-md text-left" data-mode="multiple-choice">選択問題</button>
+            <button class="mode-btn cyber-btn w-full py-2 px-4 rounded-md text-left" data-mode="typing">タイピング問題</button>
+            <button class="mode-btn cyber-btn w-full py-2 px-4 rounded-md text-left" data-mode="ordering">並べ替え問題</button>
+            <button class="mode-btn cyber-btn w-full py-2 px-4 rounded-md text-left" data-mode="matching">マッチング問題</button>
+          </div>
+        </div>
+        
+        <div class="text-center">
+          <button id="start-btn" class="cyber-btn py-3 px-8 rounded-md text-lg">開始</button>
+        </div>
+      </div>
+      
+      <!-- Game Screen -->
+      <div id="game-screen" class="hidden">
+        <div class="flex justify-between items-center mb-4">
+          <div class="cyber-panel px-4 py-2 rounded-md">
+            <span class="text-primary">問題:</span> <span id="question-counter">1/10</span>
+          </div>
+          <div class="cyber-panel px-4 py-2 rounded-md">
+            <span class="text-primary">スコア:</span> <span id="score">0</span>
+          </div>
+          <div class="cyber-panel px-4 py-2 rounded-md">
+            <span class="text-primary">時間:</span> <span id="timer">60</span>
+          </div>
+        </div>
+        
+        <div class="cyber-panel p-6 rounded-lg mb-4">
+          <div class="cyber-progress mb-4">
+            <div id="time-bar" class="cyber-progress-bar w-full"></div>
+          </div>
+          
+          <h2 id="question-text" class="text-xl mb-4"></h2>
+          
+          <div id="multiple-choice-container" class="hidden space-y-3">
+            <div id="options-container" class="space-y-2"></div>
+          </div>
+          
+          <div id="typing-container" class="hidden">
+            <input type="text" id="typing-input" class="cyber-input w-full py-2 px-4 rounded-md mb-3" placeholder="回答を入力してください...">
+            <button id="typing-submit" class="cyber-btn py-2 px-4 rounded-md">回答する</button>
+          </div>
+          
+          <div id="ordering-container" class="hidden">
+            <div id="ordering-options" class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4"></div>
+            <div id="ordering-answer" class="border border-dashed border-primary p-4 rounded-md min-h-[100px] mb-4"></div>
+            <button id="ordering-submit" class="cyber-btn py-2 px-4 rounded-md">回答する</button>
+          </div>
+          
+          <div id="matching-container" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div id="matching-left" class="space-y-2"></div>
+              <div id="matching-right" class="space-y-2"></div>
+            </div>
+            <div class="text-center mt-4">
+              <button id="matching-submit" class="cyber-btn py-2 px-4 rounded-md">回答する</button>
+            </div>
+          </div>
+        </div>
+        
+        <div id="feedback-container" class="cyber-panel p-4 rounded-lg mb-4 hidden">
+          <div id="feedback-text" class="mb-2"></div>
+        </div>
+        
+        <div class="flex justify-between items-center">
+          <button class="home-btn py-2 px-4 rounded-md text-sm" id="game-home-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+            トップに戻る
+          </button>
+          <button id="next-btn" class="cyber-btn py-2 px-6 rounded-md hidden">次の問題</button>
+        </div>
+      </div>
+      
+      <!-- Results Screen -->
+      <div id="results-screen" class="hidden cyber-panel p-8 rounded-lg text-center">
+        <h2 class="checkpoint-title text-3xl mb-4" data-text="探求完了！">探求完了！</h2>
+        <div class="mb-6">
+          <div class="text-5xl font-bold mb-2" id="final-score">0</div>
+          <div class="text-xl mb-4">ポイント</div>
+          <div class="text-2xl mb-2" id="rank-text">ランク: S</div>
+          <div id="rank-comment" class="text-gray-300">素晴らしい！科学の探求者だ！</div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="cyber-panel p-3 rounded-md">
+            <div class="text-primary">正解数</div>
+            <div class="text-2xl" id="correct-count">0/10</div>
+          </div>
+          <div class="cyber-panel p-3 rounded-md">
+            <div class="text-primary">正答率</div>
+            <div class="text-2xl" id="accuracy">0%</div>
+          </div>
+        </div>
+        <div class="flex justify-between items-center">
+          <button class="home-btn py-2 px-4 rounded-md text-sm" id="results-home-btn">
+             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+            トップに戻る
+          </button>
+          <button id="restart-btn" class="cyber-btn py-3 px-8 rounded-md">もう一度挑戦</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const allQuestions = {
+      'biology-basics': {
+        multipleChoice: [
+          // Standard
+          { question: 'ルーペで太陽を見てはいけないのはなぜですか。', answer: '目をいためるから', options: ['目をいためるから', 'ルーペが壊れるから', 'よく見えないから', 'まぶしいだけだから'], difficulty: 'standard' },
+          { question: '生物を分類するときの「ものさし」となる特徴のことを何というか。', answer: '基準', options: ['基準', '分類', '比較', '特徴'], difficulty: 'standard' },
+          { question: 'タンポポの花のような明るい色のものを顕微鏡で観察するとき、ステージは何色が見やすいか。', answer: '黒色', options: ['黒色', '白色', '赤色', '青色'], difficulty: 'standard' },
+          { question: '観察するものをスケッチするときに使う筆記用具として最も適しているものはどれか。', answer: '鉛筆', options: ['鉛筆', 'ボールペン', '色鉛筆', 'サインペン'], difficulty: 'standard' },
+          { question: '顕微鏡で観察するとき、両目を開けて観察するのはなぜか。', answer: 'スケッチしやすく、目が疲れにくいから', options: ['スケッチしやすく、目が疲れにくいから', '視野が広く見えるから', 'ピントが合いやすいから', '立体的に見えるから'], difficulty: 'standard' },
+          { question: 'ルーペで物を観察するとき、顔とルーペのどちらを動かしてピントを合わせるか。', answer: '顔を動かす', options: ['顔を動かす', 'ルーペを動かす', '両方動かす', 'どちらでもよい'], difficulty: 'standard' },
+          { question: '顕微鏡でピントを合わせるとき、最初に回すねじはどれか。', answer: '粗動ねじ', options: ['粗動ねじ', '微動ねじ', '調節ねじ', '固定ねじ'], difficulty: 'standard' },
+          { question: '次のうち、生物に共通する特徴でないものはどれか。', answer: '自分で動くことができる', options: ['自分で動くことができる', '細胞でできている', '子孫を残す', '成長する'], difficulty: 'standard' },
+          // Expert
+          { question: '顕微鏡でピントを合わせる時、プレパラートと対物レンズを破損しないようにするために、まずどうするか。', answer: '横から見ながら対物レンズをプレパラートに近づける', options: ['横から見ながら対物レンズをプレパラートに近づける', 'のぞきながら対物レンズを近づける', 'のぞきながら対物レンズを遠ざける', '反射鏡を調整する'], difficulty: 'expert' },
+          { question: '顕微鏡の視野を明るくしたい時、反射鏡のどちらの面を使うか。', answer: '凹面鏡', options: ['凹面鏡', '平面鏡', '凸面鏡', 'どちらでもよい'], difficulty: 'expert' },
+          { question: '顕微鏡で高倍率にしたとき、視野の広さと明るさはどうなるか。', answer: '狭くなり、暗くなる', options: ['狭くなり、暗くなる', '広くなり、明るくなる', '狭くなり、明るくなる', '広くなり、暗くなる'], difficulty: 'expert' },
+          { question: '接眼レンズが10倍、対物レンズが40倍のときの倍率は何倍か。', answer: '400倍', options: ['400倍', '50倍', '4倍', '10倍'], difficulty: 'expert' },
+          { question: '顕微鏡の視野の中で、見たいものが右下に見える場合、プレパラートをどちらに動かせば中央に来るか。', answer: '右下', options: ['右下', '左上', '右上', '左下'], difficulty: 'expert' },
+          { question: 'プレパラートを作るとき、カバーガラスを斜めからゆっくり下ろすのはなぜか。', answer: '気泡が入らないようにするため', options: ['気泡が入らないようにするため', '観察しやすくするため', '試料を固定するため', '水がはみ出さないようにするため'], difficulty: 'expert' },
+          { question: '「すべての生物は細胞からできている」という考え方を何というか。', answer: '細胞説', options: ['細胞説', '進化論', '遺伝の法則', '分類学'], difficulty: 'expert' },
+        ],
+        typing: [
+          { question: '生物の体のつくりやはたらきの基本単位。', answer: '細胞', difficulty: 'standard' },
+          { question: '顕微鏡で、光を反射させて視野を明るくする部分。', answer: '反射鏡', difficulty: 'standard' },
+          { question: '顕微鏡で、プレパラートをのせる台。', answer: 'ステージ', difficulty: 'standard' },
+          { question: '顕微鏡で、ピントを大まかに合わせるためのねじ。', answer: '粗動ねじ', difficulty: 'standard' },
+          { question: '生物を共通の特徴で仲間分けすること。', answer: '分類', difficulty: 'standard' },
+          { question: '観察したものをありのままにかくこと。', answer: 'スケッチ', difficulty: 'standard' },
+          { question: '顕微鏡のレンズのうち、目でのぞく側についているもの。', answer: '接眼レンズ', difficulty: 'standard' },
+          { question: '顕微鏡のレンズのうち、観察するものに近い側についているもの。', answer: '対物レンズ', difficulty: 'expert' },
+          { question: '顕微鏡で、ピントを微調整するためのねじ。', answer: '微動ねじ', difficulty: 'expert' },
+          { question: '顕微鏡で、対物レンズがついている回転する部分。', answer: 'レボルバー', difficulty: 'expert' },
+          { question: '顕微鏡の視野に入る光の量を調節する部分。', answer: 'しぼり', difficulty: 'expert' },
+          { question: '顕微鏡で観察するために、試料をスライドガラスにのせたもの。', answer: 'プレパラート', difficulty: 'expert' },
+          { question: 'プレパラートで、試料の上にかぶせる薄いガラス。', answer: 'カバーガラス', difficulty: 'expert' },
+          { question: '細胞の中にある、酢酸カーミン液などで赤く染まる部分。', answer: '核', difficulty: 'expert' },
+        ],
+        ordering: [
+          { question: '顕微鏡の操作手順を正しい順に並べよ。', options: ['接眼レンズを取り付ける', '対物レンズを取り付ける', '反射鏡で視野を明るくする', 'プレパラートをステージにのせる', 'ピントを合わせる'], answer: ['接眼レンズを取り付ける', '対物レンズを取り付ける', '反射鏡で視野を明るくする', 'プレパラートをステージにのせる', 'ピントを合わせる'], difficulty: 'expert' },
+          { question: 'タマネギの表皮のプレパラート作成手順を順に並べよ。', options: ['スライドガラスに水を1滴落とす', 'タマネギの表皮を水にひたす', '気泡が入らないようカバーガラスをかける', '染色液を落とす'], answer: ['スライドガラスに水を1滴落とす', 'タマネギの表皮を水にひたす', '気泡が入らないようカバーガラスをかける', '染色液を落とす'], difficulty: 'expert' },
+        ],
+        matching: [
+          { question: '顕微鏡の各部分とそのはたらきを正しく結びつけよ。', pairs: [ { term: '接眼レンズ', definition: '目で直接のぞくレンズ' }, { term: '対物レンズ', definition: 'プレパラートに近づけるレンズ' }, { term: '反射鏡', definition: '光を反射させて視野を明るくする' }, { term: 'しぼり', definition: '視野の明るさを調節する' } ], difficulty: 'expert' },
+          { question: 'スケッチの注意点とその理由を正しく結びつけよ。', pairs: [ { term: '影をつけない', definition: '影は観察者の主観が入るため' }, { term: '線は1本線で描く', definition: 'つくりを明確にするため' }, { term: '名称は引き出し線で示す', definition: '図と名称をはっきり区別するため' }, { term: '気づいたことを記録する', definition: '客観的な観察記録となるため' } ], difficulty: 'expert' },
+        ]
+      },
+      'plants': {
+        multipleChoice: [
+          { question: 'めしべの先で、花粉がつく部分を何というか。', answer: '柱頭', options: ['柱頭', '子房', '胚珠', 'やく'], difficulty: 'standard' },
+          { question: '受粉後、成長して種子になる部分を何というか。', answer: '胚珠', options: ['胚珠', '子房', '柱頭', '花粉'], difficulty: 'standard' },
+          { question: 'マツのように、胚珠がむき出しになっている植物のなかまを何というか。', answer: '裸子植物', options: ['裸子植物', '被子植物', 'シダ植物', 'コケ植物'], difficulty: 'standard' },
+          { question: '種子をつくらず、胞子でふえる植物はどれか。', answer: 'イヌワラビ', options: ['イヌワラビ', 'サクラ', 'アサガオ', 'マツ'], difficulty: 'standard' },
+          { question: 'アブラナの花で、おしべやめしべを保護している部分はどれか。', answer: '花弁', options: ['花弁', 'がく', '柱頭', '胚珠'], difficulty: 'standard' },
+          { question: '葉でつくられた養分が通る管を何というか。', answer: '師管', options: ['師管', '道管', '維管束', '形成層'], difficulty: 'standard' },
+          { question: '植物が、光のエネルギーを利用して水と二酸化炭素からデンプンなどの養分をつくるはたらきを何というか。', answer: '光合成', options: ['光合成', '呼吸', '蒸散', '受精'], difficulty: 'standard' },
+          { question: '光合成が行われる、植物の細胞の中にある緑色の粒を何というか。', answer: '葉緑体', options: ['葉緑体', '細胞壁', '液胞', '核'], difficulty: 'standard' },
+          { question: '植物の葉の裏側などに多く見られる、気体の出入り口となる小さなすきまを何というか。', answer: '気孔', options: ['気孔', '師管', '道管', '葉脈'], difficulty: 'standard' },
+          { question: 'アサガオやサクラのように、子葉が2枚の植物を何というか。', answer: '双子葉類', options: ['双子葉類', '単子葉類', '合弁花類', '離弁花類'], difficulty: 'expert' },
+          { question: '双子葉類の維管束の並び方はどうなっているか。', answer: '輪のように並んでいる', options: ['輪のように並んでいる', 'ばらばらに散らばっている', '束になっている', '網目状になっている'], difficulty: 'expert' },
+          { question: '光合成の実験で、ヨウ素液は何を調べるために使うか。', answer: 'デンプン', options: ['デンプン', '酸素', '二酸化炭素', '水'], difficulty: 'expert' },
+          { question: '植物の呼吸はいつ行われるか。', answer: '常に（昼も夜も）行われる', options: ['常に（昼も夜も）行われる', '昼だけ行われる', '夜だけ行われる', '光が当たっているときだけ行われる'], difficulty: 'expert' },
+          { question: '蒸散が最もさかんに行われると考えられる条件はどれか。', answer: '晴れていて、風がある日', options: ['晴れていて、風がある日', '曇っていて、風がない日', '雨が降っている日', '気温が低い日'], difficulty: 'expert' },
+        ],
+        typing: [
+          { question: 'おしべの先にある、花粉が入った袋のこと。', answer: 'やく', difficulty: 'standard' },
+          { question: '根から吸収した水などが通る、植物の体内の管。', answer: '道管', difficulty: 'standard' },
+          { question: '花粉がめしべの柱頭につくこと。', answer: '受粉', difficulty: 'standard' },
+          { question: '胚珠が子房の中にある植物のなかま。', answer: '被子植物', difficulty: 'standard' },
+          { question: '種子ができるときに、最初に発芽して葉になる部分。', answer: '子葉', difficulty: 'standard' },
+          { question: '植物の体から水が水蒸気として排出される現象。', answer: '蒸散', difficulty: 'standard' },
+          { question: '単子葉類の葉に見られる、すじが平行に走る葉脈。', answer: '平行脈', difficulty: 'expert' },
+          { question: '双子葉類の根で、太い中心の根とその側から出る細い根の組み合わせ。', answer: '主根と側根', difficulty: 'expert' },
+          { question: '道管と師管が集まってできている束。', answer: '維管束', difficulty: 'expert' },
+          { question: '受粉の後、花粉から胚珠に向かって伸びる管。', answer: '花粉管', difficulty: 'expert' },
+          { question: 'コケ植物が体を地面に固定するための根のような部分。', answer: '仮根', difficulty: 'expert' },
+          { question: 'アブラナのように花弁が１枚１枚離れている花。', answer: '離弁花', difficulty: 'expert' },
+          { question: 'ツツジのように花弁がくっついている花。', answer: '合弁花', difficulty: 'expert' },
+        ],
+        ordering: [
+          { question: '花が咲いてから種子ができるまでの過程を順に並べよ。', options: ['開花', '受粉', '受精', '果実・種子の形成'], answer: ['開花', '受粉', '受精', '果実・種子の形成'], difficulty: 'expert' },
+          { question: '光合成でデンプンができることを確かめる実験の手順を順に並べよ。', options: ['ふ入りの葉を準備する', '光を当てる', '葉を湯につける', 'エタノールで脱色する', 'ヨウ素液につける'], answer: ['ふ入りの葉を準備する', '光を当てる', '葉を湯につける', 'エタノールで脱色する', 'ヨウ素液につける'], difficulty: 'expert' },
+        ],
+        matching: [
+          { question: '植物の分類とその特徴を正しく結びつけよ。', pairs: [ { term: '被子植物', definition: '胚珠が子房の中にある' }, { term: '裸子植物', definition: '胚珠がむき出しである' }, { term: 'シダ植物', definition: '葉・茎・根の区別があり、胞子でふえる' }, { term: 'コケ植物', definition: '葉・茎・根の区別がなく、胞子でふえる' } ], difficulty: 'expert' },
+          { question: '植物の器官とはたらきを正しく結びつけよ。', pairs: [ { term: '葉', definition: '光合成や蒸散を行う' }, { term: '茎', definition: '体全体を支え、水や養分を運ぶ' }, { term: '根', definition: '体を支え、水や養分を吸収する' }, { term: '花', definition: 'なかまをふやすための生殖器官' } ], difficulty: 'expert' },
+        ]
+      },
+      'animals': {
+        multipleChoice: [
+          { question: '体の中に背骨がある動物を、まとめて何というか。', answer: '脊椎動物', options: ['脊椎動物', '無脊椎動物', '節足動物', '軟体動物'], difficulty: 'standard' },
+          { question: '子は母親の乳で育つ動物のなかまを何というか。', answer: '哺乳類', options: ['哺乳類', '鳥類', '両生類', '魚類'], difficulty: 'standard' },
+          { question: '体が外骨格でおおわれ、あしに節がある動物を何というか。', answer: '節足動物', options: ['節足動物', '軟体動物', '脊椎動物', '環形動物'], difficulty: 'standard' },
+          { question: 'カエルのように、幼生はえらで呼吸し、成体は肺と皮膚で呼吸する動物のなかまを何というか。', answer: '両生類', options: ['両生類', '魚類', 'は虫類', '哺乳類'], difficulty: 'standard' },
+          { question: 'まわりの温度によって体温が変化する動物を何というか。', answer: '変温動物', options: ['変温動物', '恒温動物', '冷血動物', '温血動物'], difficulty: 'standard' },
+          { question: '次のうち、無脊椎動物はどれか。', answer: 'イカ', options: ['イカ', 'トカゲ', 'ハト', 'フナ'], difficulty: 'standard' },
+          { question: '鳥類をおおっているものは何か。', answer: '羽毛', options: ['羽毛', 'うろこ', '毛', 'こうら'], difficulty: 'standard' },
+          { question: '次のうち、恒温動物のなかまはどれか。', answer: '鳥類と哺乳類', options: ['鳥類と哺乳類', '魚類と両生類', 'は虫類と鳥類', 'すべて変温動物'], difficulty: 'expert' },
+          { question: '子は卵から生まれ、親は体温がほぼ一定に保たれる動物のなかまは何か。', answer: '鳥類', options: ['鳥類', 'は虫類', '哺乳類', '両生類'], difficulty: 'expert' },
+          { question: '昆虫のあしは何対あるか。', answer: '3対', options: ['3対', '4対', '5対', '決まっていない'], difficulty: 'expert' },
+          { question: 'イカやアサリのように、内臓が外とう膜でおおわれている動物を何というか。', answer: '軟体動物', options: ['軟体動物', '節足動物', '環形動物', '腔腸動物'], difficulty: 'expert' },
+          { question: '節足動物のうち、エビやカニが分類されるなかまは何か。', answer: '甲殻類', options: ['甲殻類', '昆虫類', 'クモ類', '多足類'], difficulty: 'expert' },
+        ],
+        typing: [
+          { question: '体温が周りの温度によって変化する動物。', answer: '変温動物', difficulty: 'standard' },
+          { question: '昆虫の体が分かれている3つの部分のうち、あしやはねがつく部分。', answer: '胸部', difficulty: 'standard' },
+          { question: '体が外側のかたい殻でおおわれている動物のなかま。', answer: '節足動物', difficulty: 'standard' },
+          { question: '親と同じ姿で生まれ、乳で育てられる動物のなかま。', answer: '哺乳類', difficulty: 'standard' },
+          { question: '体の中に背骨がない動物。', answer: '無脊椎動物', difficulty: 'standard' },
+          { question: '卵を産んで子をふやす生まれ方。', answer: '卵生', difficulty: 'standard' },
+          { question: '昆虫の呼吸に使われる、体表にある小さな穴。', answer: '気門', difficulty: 'standard' },
+          { question: '子が、親と異なった姿で生まれ、成長の過程で姿を変えること。', answer: '変態', difficulty: 'expert' },
+          { question: 'まわりの温度が変化しても体温をほぼ一定に保つ動物。', answer: '恒温動物', difficulty: 'expert' },
+          { question: '節足動物の体を覆う、かたい殻のこと。', answer: '外骨格', difficulty: 'expert' },
+          { question: '母親の胎内で子が育ち、生まれてくるふえ方。', answer: '胎生', difficulty: 'expert' },
+          { question: '魚類の体表をおおうもの。', answer: 'うろこ', difficulty: 'expert' },
+          { question: 'カエルの幼生の名前。', answer: 'オタマジャクシ', difficulty: 'expert' },
+        ],
+        ordering: [
+          { question: 'カエルの成長段階を順に並べよ。', options: ['卵', 'おたまじゃくし', 'あしが生える', '親（成体）'], answer: ['卵', 'おたまじゃくし', 'あしが生える', '親（成体）'], difficulty: 'expert' },
+          { question: '完全変態をする昆虫（チョウなど）の成長段階を順に並べよ。', options: ['卵', '幼虫', 'さなぎ', '成虫'], answer: ['卵', '幼虫', 'さなぎ', '成虫'], difficulty: 'expert' },
+        ],
+        matching: [
+          { question: '脊椎動物の分類とその体表を正しく結びつけよ。', pairs: [ { term: '魚類', definition: 'うろこ' }, { term: '両生類', definition: '湿った皮膚' }, { term: 'は虫類', definition: 'うろこ や こうら' }, { term: '鳥類', definition: '羽毛' }, { term: '哺乳類', definition: '毛' } ], difficulty: 'expert' },
+          { question: '動物の分類とその呼吸器官（親）を正しく結びつけよ。', pairs: [ { term: '哺乳類', definition: '肺' }, { term: '魚類', definition: 'えら' }, { term: '昆虫類', definition: '気管' }, { term: '両生類', definition: '肺と皮膚' } ], difficulty: 'expert' },
+        ]
+      },
+      'chemistry-basics': {
+        multipleChoice: [
+          { question: '燃やすと二酸化炭素が発生し、こげる物質を何というか。', answer: '有機物', options: ['有機物', '無機物', '金属', '非金属'], difficulty: 'standard' },
+          { question: '電気をよく通し、みがくと特有の光沢が出る物質を何というか。', answer: '金属', options: ['金属', '非金属', '有機物', '無機物'], difficulty: 'standard' },
+          { question: '次のうち、金属に共通する性質でないものはどれか。', answer: '磁石につく', options: ['磁石につく', '電気をよく通す', '熱をよく伝える', 'たたくとうすく広がる'], difficulty: 'standard' },
+          { question: '物質そのものを見分けるための、その物質だけがもつ性質を何というか。', answer: '物質の性質（特性）', options: ['物質の性質（特性）', '密度', '質量', '体積'], difficulty: 'standard' },
+          { question: '水に溶けにくく、空気より軽い気体を集めるのに最も適した方法はどれか。', answer: '水上置換法', options: ['水上置換法', '上方置換法', '下方置換法', 'どれでもよい'], difficulty: 'expert' },
+          { question: '二酸化炭素を集めるのに適した方法はどれか。空気より重く、少し水に溶ける。', answer: '下方置換法', options: ['下方置換法', '上方置換法', '水上置換法', '集められない'], difficulty: 'expert' },
+          { question: '酸素の性質として間違っているものはどれか。', answer: '石灰水を白くにごらせる', options: ['石灰水を白くにごらせる', 'ものが燃えるのを助けるはたらきがある', '無色・無臭である', '空気よりわずかに重い'], difficulty: 'expert' },
+        ],
+        typing: [
+          { question: 'プラスチックや紙、砂糖など、燃やすとこげる物質の総称。', answer: '有機物', difficulty: 'standard' },
+          { question: '鉄や食塩、ガラスなど、燃やしてもこげない物質の総称。', answer: '無機物', difficulty: 'standard' },
+          { question: 'ものが燃えるのを助けるはたらきがある気体。', answer: '酸素', difficulty: 'standard' },
+          { question: '石灰水を白くにごらせる性質がある気体。', answer: '二酸化炭素', difficulty: 'standard' },
+          { question: '気体を発生させる実験で使う、底が平らなガラス器具。', answer: '三角フラスコ', difficulty: 'standard' },
+          { question: '物質1cm³あたりの質量のことを何というか。', answer: '密度', difficulty: 'expert' },
+          { question: 'アンモニアのように、水に非常によく溶け、空気より軽い気体を集める方法。', answer: '上方置換法', difficulty: 'expert' },
+          { question: '非常に軽い気体で、火をつけると音を出して燃える性質がある。', answer: '水素', difficulty: 'expert' },
+        ],
+        ordering: [
+            { question: 'ガスバーナーの火をつける手順を順に並べよ。', options: ['元栓を開く', 'コックを開く', '空気調節ねじとガス調節ねじを閉める', 'マッチに火をつける', 'ガス調節ねじを少し開いて点火'], answer: ['空気調節ねじとガス調節ねじを閉める', '元栓を開く', 'コックを開く', 'マッチに火をつける', 'ガス調節ねじを少し開いて点火'], difficulty: 'expert' },
+        ],
+        matching: [
+          { question: '気体の集め方とその方法が適している理由を結びつけよ。', pairs: [ { term: '水上置換法', definition: '水に溶けにくい気体に適している' }, { term: '下方置換法', definition: '空気より重い気体に適している' }, { term: '上方置換法', definition: '空気より軽い気体に適している' } ], difficulty: 'expert' },
+          { question: '物質の種類とその例を正しく結びつけよ。', pairs: [ { term: '有機物', definition: 'エタノール' }, { term: '無機物', definition: '食塩' }, { term: '金属', definition: 'アルミニウム' }, { term: '非金属（無機物）', definition: 'ガラス' } ], difficulty: 'expert' },
+        ]
+      },
+      'physics-basics': {
+        multipleChoice: [
+          { question: '光がまっすぐに進む性質を何というか。', answer: '光の直進', options: ['光の直進', '光の反射', '光の屈折', '光の分散'], difficulty: 'standard' },
+          { question: '鏡に当たった光がはね返る現象を何というか。', answer: '光の反射', options: ['光の反射', '光の屈折', '光の直進', '乱反射'], difficulty: 'standard' },
+          { question: '音を出す物体が振動していることから、音の正体は何であるといえるか。', answer: 'ふるえ（振動）', options: ['ふるえ（振動）', '光', '空気', '熱'], difficulty: 'standard' },
+          { question: '物体に力がはたらいていないとき、静止している物体が静止し続ける性質を何というか。', answer: '慣性の法則', options: ['慣性の法則', '作用・反作用の法則', '力のつり合い', 'フックの法則'], difficulty: 'standard' },
+          { question: '水中に入れたストローが曲がって見えるのは、光の何の現象によるか。', answer: '屈折', options:['屈折', '反射', '直進', '分散'], difficulty: 'expert' },
+          { question: '光の反射において、入射角と反射角の大きさの関係はどうなっているか。', answer: '等しい', options: ['等しい', '入射角のほうが大きい', '反射角のほうが大きい', '関係ない'], difficulty: 'expert' },
+          { question: '音の高さは何によって決まるか。', answer: '振動数', options: ['振動数', '振幅', '音色', '音速'], difficulty: 'expert' },
+          { question: '宇宙空間で音が伝わらないのはなぜか。', answer: '音を伝える物質（空気など）がないから', options: ['音を伝える物質（空気など）がないから', '温度が低すぎるから', '重力がないから', '光がないから'], difficulty: 'expert' },
+        ],
+        typing: [
+          { question: '光が物体に当たって、いろいろな方向に反射すること。', answer: '乱反射', difficulty: 'standard' },
+          { question: 'ばねののびが、ばねを引く力の大きさに比例するという法則。', answer: 'フックの法則', difficulty: 'standard' },
+          { question: '1秒間に振動する回数のこと。音の高さを決める。', answer: '振動数', difficulty: 'expert' },
+          { question: '振動の幅のこと。音の大きさを決める。', answer: '振幅', difficulty: 'expert' },
+          { question: '光が空気中から水に入るなど、異なる物質に進むときに折れ曲がる現象。', answer: '光の屈折', difficulty: 'expert' },
+          { question: '光源や物体と鏡とでできる像を結んだとき、鏡に対してどうなっているか。', answer: '線対称', difficulty: 'expert' },
+        ],
+        ordering: [
+            { question: '音の伝わる速さが速い順に並べよ。', options: ['固体', '液体', '気体'], answer: ['固体', '液体', '気体'], difficulty: 'expert' }
+        ],
+        matching: [
+          { question: '力の3要素を正しく結びつけよ。', pairs: [ { term: '力の大きさ', definition: '矢印の長さで表す' }, { term: '力の向き', definition: '矢印の向きで表す' }, { term: '作用点', definition: '矢印の始点で表す' } ], difficulty: 'expert' },
+        ]
+      }
+    };
+
+    const questionDatabase = {};
+
+    function populateScienceQuestions() {
+      for (const category in allQuestions) {
+        questionDatabase[category] = {
+          standard: {
+            'multiple-choice': allQuestions[category].multipleChoice.filter(q => q.difficulty === 'standard'),
+            'typing': allQuestions[category].typing.filter(q => q.difficulty === 'standard'),
+            'ordering': allQuestions[category].ordering.filter(q => q.difficulty === 'standard'),
+            'matching': allQuestions[category].matching.filter(q => q.difficulty === 'standard'),
+          },
+          expert: {
+            'multiple-choice': allQuestions[category].multipleChoice.filter(q => q.difficulty === 'expert'),
+            'typing': allQuestions[category].typing.filter(q => q.difficulty === 'expert'),
+            'ordering': allQuestions[category].ordering.filter(q => q.difficulty === 'expert'),
+            'matching': allQuestions[category].matching.filter(q => q.difficulty === 'expert'),
+          }
+        };
+      }
+    }
+
+    populateScienceQuestions();
+
+    let gameState = { category: null, difficulty: null, mode: null, questions: [], currentQuestionIndex: 0, score: 0, correctAnswers: 0, timeLeft: 60, timerInterval: null, selectedOptions: [], matchingSelections: { left: null, right: null } };
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const resultsScreen = document.getElementById('results-screen');
+    const questionText = document.getElementById('question-text');
+    const questionCounter = document.getElementById('question-counter');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const timeBar = document.getElementById('time-bar');
+    const feedbackContainer = document.getElementById('feedback-container');
+    const feedbackText = document.getElementById('feedback-text');
+    const nextBtn = document.getElementById('next-btn');
+    const multipleChoiceContainer = document.getElementById('multiple-choice-container');
+    const typingContainer = document.getElementById('typing-container');
+    const orderingContainer = document.getElementById('ordering-container');
+    const matchingContainer = document.getElementById('matching-container');
+    const finalScore = document.getElementById('final-score');
+    const rankText = document.getElementById('rank-text');
+    const rankComment = document.getElementById('rank-comment');
+    const correctCount = document.getElementById('correct-count');
+    const accuracyDisplay = document.getElementById('accuracy');
+
+    document.querySelectorAll('.category-btn').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected-item')); btn.classList.add('selected-item'); gameState.category = btn.dataset.category; }));
+    document.querySelectorAll('.difficulty-btn').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected-item')); btn.classList.add('selected-item'); gameState.difficulty = btn.dataset.difficulty; }));
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected-item')); btn.classList.add('selected-item'); gameState.mode = btn.dataset.mode; }));
+    document.getElementById('start-btn').addEventListener('click', startGame);
+    nextBtn.addEventListener('click', nextQuestion);
+    document.getElementById('restart-btn').addEventListener('click', returnToHome);
+    document.getElementById('game-home-btn').addEventListener('click', returnToHome);
+    document.getElementById('results-home-btn').addEventListener('click', returnToHome);
+    document.getElementById('typing-submit').addEventListener('click', checkTypingAnswer);
+    document.getElementById('ordering-submit').addEventListener('click', checkOrderingAnswer);
+    document.getElementById('matching-submit').addEventListener('click', checkMatchingAnswer);
+    document.getElementById('typing-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkTypingAnswer(); });
+    function returnToHome() { clearInterval(gameState.timerInterval); gameScreen.classList.add('hidden'); resultsScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); gameState.category = null; gameState.difficulty = null; gameState.mode = null; document.querySelectorAll('.selected-item').forEach(btn => btn.classList.remove('selected-item')); }
+    function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[array[i], array[j]] = [array[j], array[i]]; } return array; }
+    function startGame() { if (!gameState.category || !gameState.difficulty || !gameState.mode) { alert('分野、難易度、モードをすべて選択してください'); return; } const availableQuestions = questionDatabase[gameState.category]?.[gameState.difficulty]?.[gameState.mode]; if (!availableQuestions || availableQuestions.length === 0) { alert('この組み合わせの問題はありません。'); return; } gameState.questions = shuffleArray([...availableQuestions]).slice(0, 10); if (gameState.questions.length === 0) { alert('この組み合わせの問題はありません。'); return; } gameState.currentQuestionIndex = 0; gameState.score = 0; gameState.correctAnswers = 0; gameState.timeLeft = 60; scoreDisplay.textContent = 0; startScreen.classList.add('hidden'); resultsScreen.classList.add('hidden'); gameScreen.classList.remove('hidden'); displayQuestion(); startTimer(); }
+    function displayQuestion() { if (gameState.currentQuestionIndex >= gameState.questions.length) { endGame(); return; } const currentQuestion = gameState.questions[gameState.currentQuestionIndex]; questionText.textContent = currentQuestion.question; questionCounter.textContent = `${gameState.currentQuestionIndex + 1}/${gameState.questions.length}`; feedbackContainer.classList.add('hidden'); nextBtn.classList.add('hidden'); hideAllModeContainers(); switch (gameState.mode) { case 'multiple-choice': displayMultipleChoice(currentQuestion); break; case 'typing': displayTyping(); break; case 'ordering': displayOrdering(currentQuestion); break; case 'matching': displayMatching(currentQuestion); break; } }
+    function hideAllModeContainers() { [multipleChoiceContainer, typingContainer, orderingContainer, matchingContainer].forEach(c => c.classList.add('hidden')); }
+    function displayMultipleChoice(question) { multipleChoiceContainer.classList.remove('hidden'); const optionsContainer = document.getElementById('options-container'); optionsContainer.innerHTML = ''; const shuffledOptions = shuffleArray([...question.options]); shuffledOptions.forEach(option => { const btn = document.createElement('button'); btn.className = 'option-btn cyber-btn w-full py-2 px-4 rounded-md text-left'; btn.textContent = option; btn.addEventListener('click', () => checkMultipleChoiceAnswer(option, btn)); optionsContainer.appendChild(btn); }); }
+    function displayTyping() { typingContainer.classList.remove('hidden'); const input = document.getElementById('typing-input'); input.value = ''; input.disabled = false; input.focus(); document.getElementById('typing-submit').disabled = false; }
+    function displayOrdering(question) { orderingContainer.classList.remove('hidden'); const optionsContainer = document.getElementById('ordering-options'); const answerContainer = document.getElementById('ordering-answer'); optionsContainer.innerHTML = ''; answerContainer.innerHTML = ''; gameState.selectedOptions = []; const shuffledOptions = shuffleArray([...question.options]); shuffledOptions.forEach(option => { const btn = document.createElement('button'); btn.className = 'ordering-option cyber-btn py-2 px-3 rounded-md text-center cursor-pointer'; btn.textContent = option; btn.onclick = () => { if (btn.parentElement === optionsContainer) { answerContainer.appendChild(btn); gameState.selectedOptions.push(option); } else { optionsContainer.appendChild(btn); gameState.selectedOptions = gameState.selectedOptions.filter(item => item !== option); } }; optionsContainer.appendChild(btn); }); document.getElementById('ordering-submit').disabled = false; }
+    function displayMatching(question) { matchingContainer.classList.remove('hidden'); const leftContainer = document.getElementById('matching-left'); const rightContainer = document.getElementById('matching-right'); leftContainer.innerHTML = ''; rightContainer.innerHTML = ''; gameState.matchingSelections = { left: null, right: null }; const terms = shuffleArray(question.pairs.map(p => p.term)); const definitions = shuffleArray(question.pairs.map(p => p.definition)); const createBtn = (text, type, container) => { const btn = document.createElement('button'); btn.className = 'option-btn cyber-btn w-full py-2 px-4 rounded-md text-left'; btn.textContent = text; btn.dataset.type = type; btn.addEventListener('click', () => handleMatchingSelection(btn)); container.appendChild(btn); }; terms.forEach(term => createBtn(term, 'left', leftContainer)); definitions.forEach(def => createBtn(def, 'right', rightContainer)); document.getElementById('matching-submit').disabled = false; }
+    function handleMatchingSelection(btn) { const type = btn.dataset.type; const container = type === 'left' ? document.getElementById('matching-left') : document.getElementById('matching-right'); container.querySelectorAll('.selected-item').forEach(b => b.classList.remove('selected-item')); btn.classList.add('selected-item'); gameState.matchingSelections[type] = btn; }
+    function checkAnswer(isCorrect, correctAnswerText) { if (isCorrect) { updateScore(10 + (gameState.difficulty === 'expert' ? 5 : 0)); gameState.correctAnswers++; showFeedback(true, `正解！`); } else { showFeedback(false, `不正解… 正解は: ${correctAnswerText}`); } document.querySelectorAll('#game-screen button:not(#next-btn):not(.home-btn)').forEach(b => b.disabled = true); document.querySelectorAll('#game-screen input').forEach(i => i.disabled = true); nextBtn.classList.remove('hidden'); }
+    function checkMultipleChoiceAnswer(selectedOption, btn) { document.querySelectorAll('#options-container button').forEach(b => b.disabled = true); const question = gameState.questions[gameState.currentQuestionIndex]; const isCorrect = selectedOption === question.answer; btn.classList.add(isCorrect ? 'correct' : 'incorrect'); checkAnswer(isCorrect, question.answer); }
+    function checkTypingAnswer() { const userAnswer = document.getElementById('typing-input').value.trim(); if (!userAnswer) return; const question = gameState.questions[gameState.currentQuestionIndex]; checkAnswer(userAnswer === question.answer, question.answer); }
+    function checkOrderingAnswer() { const question = gameState.questions[gameState.currentQuestionIndex]; const selected = Array.from(document.getElementById('ordering-answer').children).map(el => el.textContent); checkAnswer(JSON.stringify(selected) === JSON.stringify(question.answer), question.answer.join(' → ')); }
+    function checkMatchingAnswer() { const { left, right } = gameState.matchingSelections; if (!left || !right) { alert('両方の列から1つずつ選択してください。'); return; } const question = gameState.questions[gameState.currentQuestionIndex]; const answerMap = new Map(question.pairs.map(p => [p.term, p.definition])); const isCorrectPair = answerMap.get(left.textContent) === right.textContent; left.classList.add(isCorrectPair ? 'correct' : 'incorrect'); right.classList.add(isCorrectPair ? 'correct' : 'incorrect'); checkAnswer(isCorrectPair, `「${left.textContent}」の正しい組み合わせは「${answerMap.get(left.textContent)}」です。`); }
+    function showFeedback(isCorrect, text) { feedbackText.textContent = text; feedbackText.className = isCorrect ? 'text-green-400' : 'text-red-400'; feedbackContainer.classList.remove('hidden'); }
+    function updateScore(points) { gameState.score += points; scoreDisplay.textContent = gameState.score; scoreDisplay.classList.add('score-animation'); setTimeout(() => scoreDisplay.classList.remove('score-animation'), 500); }
+    function startTimer() { timerDisplay.textContent = gameState.timeLeft; timeBar.style.width = '100%'; gameState.timerInterval = setInterval(() => { gameState.timeLeft--; timerDisplay.textContent = gameState.timeLeft; timeBar.style.width = `${(gameState.timeLeft / 60) * 100}%`; if (gameState.timeLeft <= 0) { clearInterval(gameState.timerInterval); endGame(); } }, 1000); }
+    function nextQuestion() { gameState.currentQuestionIndex++; displayQuestion(); }
+    function endGame() { clearInterval(gameState.timerInterval); gameScreen.classList.add('hidden'); resultsScreen.classList.remove('hidden'); const totalQuestions = gameState.questions.length > 0 ? gameState.questions.length : 10; const accuracy = totalQuestions > 0 ? Math.round((gameState.correctAnswers / totalQuestions) * 100) : 0; finalScore.textContent = gameState.score; correctCount.textContent = `${gameState.correctAnswers}/${totalQuestions}`; accuracyDisplay.textContent = `${accuracy}%`; let rank, comment; if (accuracy >= 90) { rank = 'S'; comment = '素晴らしい！科学の探求者だ！'; } else if (accuracy >= 70) { rank = 'A'; comment = '優秀だ！あと少しで完璧！'; } else if (accuracy >= 50) { rank = 'B'; comment = '良い調子！繰り返し挑戦しよう！'; } else if (accuracy >= 30) { rank = 'C'; comment = 'まだ伸びしろがあるぞ！'; } else { rank = 'D', comment = 'もっと学習が必要だ。頑張ろう！'; } rankText.textContent = `ランク: ${rank}`; rankComment.textContent = comment; }
+
+  </script>
+</body>
+</html>
