@@ -1,0 +1,1 @@
+# rika1-1gakki
